@@ -1,0 +1,269 @@
+/* Card and Tools */
+.card-tools {
+    float: right;
+}
+
+/* Table Styles */
+.table thead th {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Input Groups */
+.input-group-text {
+    border-right: 0;
+}
+
+.input-group .form-control {
+    border-left: 0;
+}
+
+/* DataTables */
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 1rem;
+}
+
+.table-responsive {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow-x: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100% !important;
+    margin-bottom: 0;
+}
+
+.table td {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+/* Layout */
+.content-wrapper {
+    transition: margin-left .3s ease-in-out;
+    margin-left: 250px;
+}
+
+body.sidebar-collapse .content-wrapper {
+    margin-left: 4.6rem;
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Buttons */
+.btn-group .btn {
+    padding: 6px 12px;
+    line-height: 1.2;
+    margin: 0 2px;
+}
+
+.btn-group .btn i {
+    font-size: 16px;
+}
+
+.actions-column {
+    white-space: nowrap;
+    width: 120px;
+    text-align: center;
+    padding: 8px !important;
+}
+
+.actions-column .btn-group {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Select2 Styles */
+.select2-container--bootstrap4 .select2-selection {
+    height: 38px !important;
+    text-align: left !important;
+    padding-right: 30px !important;
+}
+
+.select2-container--bootstrap4 .select2-selection__rendered {
+    padding-top: 5px !important;
+    padding-left: 12px !important;
+    text-align: left !important;
+    line-height: 1.5 !important;
+}
+
+.select2-container--bootstrap4 .select2-selection__arrow {
+    display: block !important;
+    top: 50% !important;
+    right: 3px !important;
+    transform: translateY(-50%) !important;
+}
+
+/* Filter Section */
+.filter-section {
+    position: relative;
+    z-index: 1;
+}
+
+.filter-section .form-group label {
+    text-align: center !important;
+    width: 100%;
+}
+
+/* Modal Styles */
+#editRuleModal .form-group label {
+    text-align: left !important;
+    width: 100%;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1045;
+}
+
+.modal-content {
+    position: relative;
+    z-index: 1046;
+}
+
+/* Status Badges */
+.badge-success, .badge-danger {
+    color: #fff !important;
+    font-weight: 500;
+    padding: 0.4em 0.6em;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Clear Filters Button */
+#clearFilters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+}
+
+/* Table layout */
+.table-responsive {
+    overflow-x: auto !important;
+}
+
+.table {
+    width: 100% !important;
+    min-width: 1200px;
+}
+
+.table td {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+/* Make specific columns narrower */
+.table th:nth-child(1),  /* Project */
+.table th:nth-child(2),  /* NIK */
+.table th:nth-child(4),  /* Role */
+.table th:nth-child(5),  /* Tenure */
+.table th:nth-child(10), /* Status */
+.table th:nth-child(11), /* Doc */
+.table th:nth-child(12)  /* Actions */ {
+    width: 100px;
+}
+
+/* Make chronology and consequences columns flexible */
+.table th:nth-child(6),  /* Case Chronology */
+.table th:nth-child(7)   /* Consequences */ {
+    min-width: 200px;
+}
+
+/* Remove DataTables sorting icons */
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before,
+table.dataTable thead .sorting_desc_disabled:after {
+    display: none !important;
+}
+
+/* Add custom sort indicators */
+table.dataTable thead .sorting_asc {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABWSURBVHjaYvz//z8DJYCJgUIw8DUzMjIyoEsyMzMzlJSUMEydOpXh379/DK9fv2Y4c+YMw+PHjxnOnz/P8OXLFwZGRkYGNjY2BhYWFgYODg6y9I94zQADAMyCEVHj6O8/AAAAAElFTkSuQmCC') !important;
+    background-repeat: no-repeat !important;
+    background-position: center right !important;
+}
+
+table.dataTable thead .sorting_desc {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABQSURBVHjaYvz//z8DJYCJgUIwNDQzMjIyMDMzM5SUlDBMnTqV4d+/fwyvX79mOHPmDMPjx48Zzp8/z/DlyxcGRkZGBjY2NgYWFhYGDg4OsvSPeM0AAwBz1BFRmF+GnQAAAABJRU5ErkJggg==') !important;
+    background-repeat: no-repeat !important;
+    background-position: center right !important;
+}
+
+/* Update table header styles */
+.table thead th {
+    vertical-align: middle;
+    text-align: center;
+    padding-right: 20px !important; /* Space for sort indicator */
+    position: relative;
+    cursor: pointer;
+    background-color: #f4f6f9;
+}
+
+/* Select2 Styles - Remove X button but keep dropdown arrow */
+.select2-selection__clear {
+    display: none !important;
+}
+
+/* Notification styling */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+}
+
+.alert {
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert i {
+    font-size: 20px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
