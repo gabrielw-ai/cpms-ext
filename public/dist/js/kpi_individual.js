@@ -151,12 +151,34 @@ $(document).ready(function() {
     $("#processKPI").on("click", function() {
         if (isLimitedAccess) return;
         
+        // Get selected values
+        var kpiMetrics = $('#kpiMetrics').val();
+        var queue = $('#queue').val();
+        var project = $("#project").val();
+        
+        // Validate project
+        if (!project) {
+            showNotification('You need to select a project first', 'error');
+            return;
+        }
+        
+        // Validate KPI Metrics
+        if (!kpiMetrics || kpiMetrics.length === 0 || kpiMetrics[0] === '' || kpiMetrics[0] === 'Select options') {
+            showNotification('You need to select KPI Metrics', 'error');
+            return;
+        }
+        
+        // Validate Queue
+        if (!queue || queue.length === 0 || queue[0] === '' || queue[0] === 'Select options') {
+            showNotification('You need to select Queue', 'error');
+            return;
+        }
+
         // Add debug logs
         console.log('Current project value:', $("#project").val());
         console.log('Current metrics:', $("#kpiMetrics").val());
         console.log('Current queues:', $("#queue").val());
 
-        const project = $("#project").val().toLowerCase();
         const selectedMetrics = $("#kpiMetrics").val();
         const selectedQueues = $("#queue").val();
 
@@ -374,7 +396,45 @@ $(document).ready(function() {
     // Add KPI form submit handler
     $("#addKPIForm").on("submit", function(e) {
         e.preventDefault();
-
+        
+        // Get form values and validate
+        var employee = $('#employeeSelect').val();
+        var kpiMetrics = $('#modalKPIMetrics').val();
+        var queue = $('#modalQueue').val();
+        var month = $('select[name="month"]').val();
+        var value = $('input[name="value"]').val();
+        
+        // Validate employee
+        if (!employee || employee === '') {
+            showNotification('You need to select an employee', 'error');
+            return false;
+        }
+        
+        // Validate KPI Metrics
+        if (!kpiMetrics || kpiMetrics === '' || kpiMetrics === 'Select KPI Metrics' || kpiMetrics === 'Select options') {
+            showNotification('You need to select KPI Metrics', 'error');
+            return false;
+        }
+        
+        // Validate Queue
+        if (!queue || queue === '' || queue === 'Select KPI Metrics First' || queue === 'Select options') {
+            showNotification('You need to select Queue', 'error');
+            return false;
+        }
+        
+        // Validate month
+        if (!month) {
+            showNotification('You need to select a month', 'error');
+            return false;
+        }
+        
+        // Validate value
+        if (!value || value === '') {
+            showNotification('You need to enter a value', 'error');
+            return false;
+        }
+        
+        // If validation passes, proceed with form submission
         const formData = new FormData(this);
         formData.append('project', $("#project").val());
 

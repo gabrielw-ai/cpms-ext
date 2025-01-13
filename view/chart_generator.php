@@ -5,11 +5,23 @@ global $conn;
 
 $page_title = "Chart Generator";
 
+// Function to get week number from date
+function getWeekNumber($date) {
+    return date('W', strtotime($date));
+}
+
+// Function to get month name from date
+function getMonthName($date) {
+    return date('F', strtotime($date));
+}
+
 // Add required CSS
 $additional_css = '
 <!-- Select2 -->
 <link rel="stylesheet" href="../adminlte/plugins/select2/css/select2.min.css">
 <link rel="stylesheet" href="../adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+<!-- DateRangePicker -->
+<link rel="stylesheet" href="../adminlte/plugins/daterangepicker/daterangepicker.css">
 <style>
     .select2-container--default .select2-selection--single {
         height: calc(2.25rem + 2px);
@@ -27,12 +39,24 @@ $additional_css = '
         white-space: nowrap;
         vertical-align: middle;
     }
+    .date-range-container {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+    .date-range-container .form-group {
+        flex: 1;
+    }
 </style>';
 
 // Add required JavaScript
 $additional_js = '
 <!-- Select2 -->
 <script src="../adminlte/plugins/select2/js/select2.full.min.js"></script>
+<!-- Moment.js -->
+<script src="../adminlte/plugins/moment/moment.min.js"></script>
+<!-- DateRangePicker -->
+<script src="../adminlte/plugins/daterangepicker/daterangepicker.js"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -42,50 +66,58 @@ $(document).ready(function() {
         theme: "bootstrap4"
     });
 
-    // Update KPI metrics when project or period changes
-    $("#project, #period").change(function() {
-        const project = $("#project").val();
-        const period = $("#period").val();
-        
-        if (!project) {
-            $("#kpi_metrics").html("<option value=\'\'>Select Project First</option>").prop("disabled", true);
-            return;
+    // Initialize DateRangePicker
+    $("#date_range").daterangepicker({
+        locale: {
+            format: "YYYY-MM-DD"
+        },
+        startDate: moment().startOf("month"),
+        endDate: moment(),
+        ranges: {
+           "This Month": [moment().startOf("month"), moment().endOf("month")],
+           "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")],
+           "Last 3 Months": [moment().subtract(2, "month").startOf("month"), moment()],
+           "This Year": [moment().startOf("year"), moment()]
         }
+    });
 
-        const tableName = project + (period === "monthly" ? "_mon" : "");
+    // Handle period change
+    $("#period").on("change", function() {
+        const period = $(this).val();
+        const dateRange = $("#date_range").data("daterangepicker");
+        const startDate = dateRange.startDate;
+        const endDate = dateRange.endDate;
         
-        // Show loading
-        $("#kpi_metrics").html("<option value=\'\'>Loading...</option>").prop("disabled", true);
-        
-        // Fetch metrics
-        fetch(`../controller/get_kpi_metrics.php?table=${encodeURIComponent(tableName)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(\'Network response was not ok\');
+        if (period === "weekly") {
+            // Get week numbers for the date range
+            const weeks = [];
+            let currentDate = moment(startDate);
+            
+            while (currentDate <= endDate) {
+                const weekNum = currentDate.isoWeek();
+                const year = currentDate.year();
+                if (!weeks.includes(`Week ${weekNum} (${year})`)) {
+                    weeks.push(`Week ${weekNum} (${year})`);
                 }
-                return response.json();
-            })
-            .then(data => {
-                const select = $("#kpi_metrics");
-                select.empty().append("<option value=\'\'>Select KPI Metric</option>");
-                
-                if (Array.isArray(data) && data.length > 0) {
-                    data.forEach(metric => {
-                        select.append(new Option(metric, metric));
-                    });
-                    select.prop("disabled", false);
-                } else if (data.error) {
-                    throw new Error(data.error);
-                } else {
-                    select.html("<option value=\'\'>No metrics found</option>");
+                currentDate.add(1, "week");
+            }
+            
+            console.log("Weeks in range:", weeks);
+        } else if (period === "monthly") {
+            // Get months for the date range
+            const months = [];
+            let currentDate = moment(startDate);
+            
+            while (currentDate <= endDate) {
+                const monthName = currentDate.format("MMMM YYYY");
+                if (!months.includes(monthName)) {
+                    months.push(monthName);
                 }
-            })
-            .catch(error => {
-                console.error(\'Error:\', error);
-                $("#kpi_metrics")
-                    .html("<option value=\'\'>Error loading metrics</option>")
-                    .prop("disabled", true);
-            });
+                currentDate.add(1, "month");
+            }
+            
+            console.log("Months in range:", months);
+        }
     });
 
     // Handle form submission
@@ -95,6 +127,9 @@ $(document).ready(function() {
         const project = $("#project").val();
         const period = $("#period").val();
         const metric = $("#kpi_metrics").val();
+        const dateRange = $("#date_range").data("daterangepicker");
+        const startDate = dateRange.startDate.format("YYYY-MM-DD");
+        const endDate = dateRange.endDate.format("YYYY-MM-DD");
         
         if (!project || !metric) return;
         
@@ -103,7 +138,7 @@ $(document).ready(function() {
         chartContainer.innerHTML = "<div class=\"d-flex justify-content-center align-items-center\" style=\"height:500px\"><div class=\"spinner-border text-primary\"></div></div>";
         
         // Fetch data
-        fetch(`../controller/get_chart_data.php?project=${encodeURIComponent(project)}&period=${period}&metric=${encodeURIComponent(metric)}`)
+        fetch(`../controller/get_chart_data.php?project=${encodeURIComponent(project)}&period=${period}&metric=${encodeURIComponent(metric)}&start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
             .then(data => {
                 if (!data.success) throw new Error(data.error);
@@ -129,7 +164,7 @@ $(document).ready(function() {
                         plugins: {
                             title: {
                                 display: true,
-                                text: metric
+                                text: `${metric} (${period === "weekly" ? "Weekly" : "Monthly"} View)`
                             }
                         },
                         scales: {
@@ -158,7 +193,7 @@ ob_start();
         <!-- Filter Form -->
         <form id="chartFilterForm" class="mb-4">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="project">Project Name</label>
                         <select class="form-control select2" id="project" name="project" required>
@@ -179,7 +214,7 @@ ob_start();
                         </select>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <div class="form-group">
                         <label for="period">Period</label>
                         <select class="form-control select2" id="period" name="period" required>
@@ -189,6 +224,12 @@ ob_start();
                     </div>
                 </div>
                 <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="date_range">Date Range</label>
+                        <input type="text" class="form-control" id="date_range" name="date_range" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="kpi_metrics">KPI Metrics</label>
                         <select class="form-control select2" id="kpi_metrics" name="kpi_metrics" required>

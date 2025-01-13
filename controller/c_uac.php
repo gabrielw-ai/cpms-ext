@@ -152,10 +152,10 @@ class UserAccessControl {
                     'icon' => 'fas fa-user-cog',
                     'url' => '#',
                     'submenu' => [
-                        ['url' => 'roles', 'icon' => 'fas fa-user-tag', 'text' => 'Role Management'],
-                        ['url' => 'role/uac', 'icon' => 'fas fa-user-shield', 'text' => 'Role UAC'],
-                        ['url' => 'user/mass-reset', 'icon' => 'fas fa-key', 'text' => 'Mass Reset Password'],
-                        ['url' => 'user/settings', 'icon' => 'fas fa-cog', 'text' => 'My Settings']
+                        ['url' => 'roles', 'icon' => 'far fa-circle', 'text' => 'Role Management'],
+                        ['url' => 'role/uac', 'icon' => 'far fa-circle', 'text' => 'Role UAC'],
+                        ['url' => 'user/mass-reset', 'icon' => 'far fa-circle', 'text' => 'Mass Reset Password'],
+                        ['url' => 'user/settings', 'icon' => 'far fa-circle', 'text' => 'My Settings']
                     ]
                 ]
             ];
@@ -165,7 +165,14 @@ class UserAccessControl {
                     $menuItems = [
                         ['url' => 'kpi/individual', 'icon' => 'fas fa-chart-line', 'text' => 'KPI Individual'],
                         ['url' => 'ccs/viewer', 'icon' => 'fas fa-eye', 'text' => 'CCS Rules Viewer'],
-                        ['url' => 'user/settings', 'icon' => 'fas fa-user-cog', 'text' => 'User Settings']
+                        [
+                            'text' => 'User Settings',
+                            'icon' => 'fas fa-user-cog',
+                            'url' => '#',
+                            'submenu' => [
+                                ['url' => 'user/settings', 'icon' => 'fas fa-cog', 'text' => 'My Settings']
+                            ]
+                        ]
                     ];
                     break;
                 
@@ -181,7 +188,14 @@ class UserAccessControl {
                             ]
                         ],
                         ['url' => 'ccs/viewer', 'icon' => 'fas fa-eye', 'text' => 'CCS Rules Viewer'],
-                        ['url' => 'user/settings', 'icon' => 'fas fa-user-cog', 'text' => 'User Settings']
+                        [
+                            'text' => 'User Settings',
+                            'icon' => 'fas fa-user-cog',
+                            'url' => '#',
+                            'submenu' => [
+                                ['url' => 'user/settings', 'icon' => 'fas fa-cog', 'text' => 'My Settings']
+                            ]
+                        ]
                     ];
                     break;
 
@@ -199,7 +213,14 @@ class UserAccessControl {
                         ],
                         ['url' => 'employees', 'icon' => 'fas fa-users', 'text' => 'Employee List'],
                         ['url' => 'ccs/viewer', 'icon' => 'fas fa-eye', 'text' => 'CCS Rules Viewer'],
-                        ['url' => 'user/settings', 'icon' => 'fas fa-user-cog', 'text' => 'User Settings']
+                        [
+                            'text' => 'User Settings',
+                            'icon' => 'fas fa-user-cog',
+                            'url' => '#',
+                            'submenu' => [
+                                ['url' => 'user/settings', 'icon' => 'fas fa-cog', 'text' => 'My Settings']
+                            ]
+                        ]
                     ];
                     break;
 
@@ -230,9 +251,9 @@ class UserAccessControl {
                             'icon' => 'fas fa-user-cog',
                             'url' => '#',
                             'submenu' => [
-                                ['url' => 'roles', 'icon' => 'fas fa-user-tag', 'text' => 'Role Management'],
-                                ['url' => 'user/mass-reset', 'icon' => 'fas fa-key', 'text' => 'Mass Reset Password'],
-                                ['url' => 'user/settings', 'icon' => 'fas fa-cog', 'text' => 'My Settings']
+                                ['url' => 'roles', 'icon' => 'far fa-circle', 'text' => 'Role Management'],
+                                ['url' => 'user/mass-reset', 'icon' => 'far fa-circle', 'text' => 'Mass Reset Password'],
+                                ['url' => 'user/settings', 'icon' => 'far fa-circle', 'text' => 'My Settings']
                             ]
                         ]
                     ];

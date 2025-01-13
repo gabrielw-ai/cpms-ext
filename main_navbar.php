@@ -79,7 +79,7 @@ $uac = new UserAccessControl($userPrivilege);
         <!-- Add this to your navbar for logout -->
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="fas fa-user"></i>
                     <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                 </a>
@@ -197,6 +197,15 @@ $(document).ready(function() {
             $(this).parents('.nav-treeview').prev().addClass('active');
         }
     });
+
+    // Initialize Bootstrap dropdowns
+    $('.dropdown-toggle').dropdown();
+    
+    // Ensure dropdowns work on hover
+    $('.nav-item.dropdown').hover(
+        function() { $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(300); },
+        function() { $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(300); }
+    );
 });
 </script>
 <?php if (isset($additional_js)) echo $additional_js; ?>

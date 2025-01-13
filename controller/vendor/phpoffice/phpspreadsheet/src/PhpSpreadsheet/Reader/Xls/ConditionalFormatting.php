@@ -36,12 +36,20 @@ class ConditionalFormatting extends Xls
 
     public static function type(int $type): ?string
     {
-        return self::$types[$type] ?? null;
+        if (isset(self::$types[$type])) {
+            return self::$types[$type];
+        }
+
+        return null;
     }
 
     public static function operator(int $operator): ?string
     {
-        return self::$operators[$operator] ?? null;
+        if (isset(self::$operators[$operator])) {
+            return self::$operators[$operator];
+        }
+
+        return null;
     }
 
     /**
