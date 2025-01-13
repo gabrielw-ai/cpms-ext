@@ -142,3 +142,8 @@ Router::add('project/employees', '/controller/get_project_employees.php');
 // Add this with other routes
 Router::add('employee/details', 'controller/get_employee_details.php');
 
+// Add these with other Router::add calls
+Router::add('kpi/summary/get', '/controller/get_kpi_summary.php');
+Router::add('kpi/summary/export', '/controller/c_export_kpi_summary.php');
+Router::add('kpi/summary/import', '/controller/c_import_kpi_summary.php');
+

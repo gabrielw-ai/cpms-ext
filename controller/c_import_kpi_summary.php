@@ -18,34 +18,35 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Function to safely encode JSON response
-function sendJsonResponse($success, $data) {
-    // Don't clear all output buffers, just clean the current one
-    if (ob_get_level()) {
-        ob_clean();
+function sendJsonResponse($success, $message = '', $data = []) {
+    // Clean all output buffers
+    while (ob_get_level()) {
+        ob_end_clean();
     }
     
     // Set headers to prevent caching
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Cache-Control: post-check=0, pre-check=0', false);
     header('Pragma: no-cache');
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=utf-8');
     
-    // Keep session alive
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        session_write_close();
+    $response = [
+        'success' => $success,
+        'message' => $message
+    ];
+
+    if (!empty($data)) {
+        $response['data'] = $data;
     }
     
-    echo json_encode([
-        'success' => $success,
-        'data' => $data
-    ]);
+    echo json_encode($response);
     exit;
 }
 
 try {
     // Initialize UAC and validate session first
     if (!isset($_SESSION['user_nik']) || empty($_SESSION['user_nik'])) {
-        sendJsonResponse(false, ['error' => 'Session expired. Please login again.']);
+        sendJsonResponse(false, 'Session expired. Please login again.');
     }
 
     // Initialize UAC
@@ -53,38 +54,17 @@ try {
 
     // Check if user can import
     if (!$uac->canImport()) {
-        sendJsonResponse(false, ['error' => 'You do not have permission to import data']);
+        sendJsonResponse(false, 'You do not have permission to import data');
     }
 
-    // Validate request parameters first
+    // Validate request parameters
     if (!isset($_POST['table_name']) || empty($_POST['table_name'])) {
-        sendJsonResponse(false, ['error' => 'Project table name is required']);
+        sendJsonResponse(false, 'Project table name is required');
     }
 
     if (!isset($_FILES['file']) || empty($_FILES['file'])) {
-        sendJsonResponse(false, ['error' => 'No file uploaded']);
+        sendJsonResponse(false, 'No file uploaded');
     }
-
-    // For privilege level 3, verify the user has access to this project
-    if ($uac->userPrivilege === 3) {
-        $userProject = $uac->getUserProject($conn, $_SESSION['user_nik']);
-        // Convert table name (e.g., 'kpi_project_name') to project name format
-        $requestedProject = preg_replace('/^kpi_/', '', $_POST['table_name']); // Remove 'kpi_' prefix
-        
-        // Normalize both strings for comparison (convert to lowercase and standardize separators)
-        $normalizedUserProject = strtolower(str_replace(['_', ' '], '', $userProject));
-        $normalizedRequestedProject = strtolower(str_replace(['_', ' '], '', $requestedProject));
-        
-        error_log("Debug - Import - Normalized User Project: '$normalizedUserProject', Normalized Requested Project: '$normalizedRequestedProject'");
-        
-        if (!$userProject || $normalizedUserProject !== $normalizedRequestedProject) {
-            error_log("Import access denied - Original User Project: '$userProject', Original Requested Project: '$requestedProject'");
-            sendJsonResponse(false, ['error' => 'You do not have access to this project']);
-        }
-    }
-
-    // Log debugging information
-    error_log("Processing import for table: " . $_POST['table_name'] . " by user: " . $_SESSION['user_nik']);
 
     // Validate file upload
     if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
@@ -100,20 +80,16 @@ try {
         $errorMessage = isset($uploadErrors[$_FILES['file']['error']]) 
             ? $uploadErrors[$_FILES['file']['error']] 
             : 'Unknown upload error';
-        sendJsonResponse(false, ['error' => $errorMessage]);
+        sendJsonResponse(false, $errorMessage);
     }
 
     // Get table names
     $baseTableName = $_POST['table_name'];
     $monthlyTableName = $baseTableName . "_mon";
 
-    // Log table names
-    error_log("Base table name: " . $baseTableName);
-    error_log("Monthly table name: " . $monthlyTableName);
-
     // Validate file exists
     if (!file_exists($_FILES['file']['tmp_name'])) {
-        sendJsonResponse(false, ['error' => 'Uploaded file not found']);
+        sendJsonResponse(false, 'Uploaded file not found');
     }
 
     // Load the Excel file
@@ -121,18 +97,15 @@ try {
         $spreadsheet = IOFactory::load($_FILES['file']['tmp_name']);
     } catch (Exception $e) {
         error_log("Excel load error: " . $e->getMessage());
-        sendJsonResponse(false, ['error' => 'Failed to load Excel file: ' . $e->getMessage()]);
+        sendJsonResponse(false, 'Failed to load Excel file: ' . $e->getMessage());
     }
 
     $worksheet = $spreadsheet->getActiveSheet();
     $rows = $worksheet->toArray();
 
-    // Log row count
-    error_log("Number of rows: " . count($rows));
-
     // Validate we have data
     if (count($rows) < 2) {
-        sendJsonResponse(false, ['error' => 'File contains no data']);
+        sendJsonResponse(false, 'File contains no data');
     }
 
     // Remove header row
@@ -153,9 +126,6 @@ try {
             $target = trim($row[2]);
             $targetType = strtolower(trim($row[3]));
 
-            // Log row data
-            error_log("Processing row " . ($index + 2) . ": " . implode(", ", $row));
-
             // Validate data
             if (empty($queue) || empty($kpiMetrics) || $target === '') {
                 throw new Exception("Missing required data in row " . ($index + 2));
@@ -170,73 +140,38 @@ try {
             $tables = [$baseTableName, $monthlyTableName];
             
             foreach ($tables as $table) {
-                // Check if KPI exists
-                $stmt = $conn->prepare("SELECT id FROM `$table` WHERE queue = ? AND kpi_metrics = ?");
-                $stmt->execute([$queue, $kpiMetrics]);
-                $exists = $stmt->fetch();
-
-                if ($exists) {
-                    $stmt = $conn->prepare("
-                        UPDATE `$table` 
-                        SET target = ?, target_type = ?
-                        WHERE queue = ? AND kpi_metrics = ?
-                    ");
-                    $stmt->execute([$target, $targetType, $queue, $kpiMetrics]);
-                } else {
-                    $stmt = $conn->prepare("
-                        INSERT INTO `$table` 
-                        (queue, kpi_metrics, target, target_type)
-                        VALUES (?, ?, ?, ?)
-                    ");
-                    $stmt->execute([$queue, $kpiMetrics, $target, $targetType]);
-                }
+                $stmt = $conn->prepare("
+                    INSERT INTO `$table` (queue, kpi_metrics, target, target_type)
+                    VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    target = VALUES(target),
+                    target_type = VALUES(target_type)
+                ");
+                $stmt->execute([$queue, $kpiMetrics, $target, $targetType]);
             }
 
             $processed++;
 
         } catch (Exception $e) {
-            error_log("Row error: " . $e->getMessage());
             $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
         }
     }
 
     if (empty($errors)) {
         $conn->commit();
-        error_log("Import successful - Processed $processed records for table: " . $_POST['table_name']);
-        
-        // Ensure session is preserved before sending response
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id(true); // Regenerate session ID for security
-            session_write_close();
-        }
-        
-        sendJsonResponse(true, [
-            'message' => "Successfully processed $processed records",
+        sendJsonResponse(true, "Successfully processed $processed records", [
             'processed' => $processed
         ]);
     } else {
         $conn->rollBack();
-        error_log("Import failed with errors: " . implode(", ", $errors));
-        sendJsonResponse(false, ['error' => implode(", ", $errors)]);
+        sendJsonResponse(false, implode(", ", $errors));
     }
 
 } catch (Exception $e) {
-    error_log("Import error in " . __FILE__ . ": " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
-    
     if (isset($conn) && $conn->inTransaction()) {
         $conn->rollBack();
     }
     
-    // Ensure session is preserved
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        session_regenerate_id(true);
-        session_write_close();
-    }
-    
-    sendJsonResponse(false, [
-        'error' => 'Import failed: ' . $e->getMessage(),
-        'file' => basename(__FILE__),
-        'line' => $e->getLine()
-    ]);
+    error_log("Import error: " . $e->getMessage());
+    sendJsonResponse(false, 'Import failed: ' . $e->getMessage());
 } 

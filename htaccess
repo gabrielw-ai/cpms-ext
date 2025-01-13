@@ -2,7 +2,7 @@
 RewriteEngine On
 
 # Set RewriteBase to match BASE_PATH from site_config.php
-RewriteBase /cpms
+RewriteBase /demos
 
 # Skip rewrite for existing files or directories
 RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -52,4 +52,5 @@ Options -Indexes
 
 # Set default character set
 AddDefaultCharset UTF-8
+
 

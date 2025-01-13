@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        window.location.href = '<?php echo Router::url("controller/c_export_kpi_summary.php"); ?>?project=' + encodeURIComponent(selectedProject);
+        window.location.href = '<?php echo Router::url("kpi/summary/export"); ?>?project=' + encodeURIComponent(selectedProject);
     });
 
     // Handle project selection
@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Load KPI data with error handling
         $.ajax({
-            url: '<?php echo Router::url("controller/get_kpi_summary.php"); ?>',
+            url: '<?php echo Router::url("kpi/summary/get"); ?>',
             type: 'GET',
             data: { 
                 project: selectedProject,
@@ -602,43 +602,53 @@ document.addEventListener('DOMContentLoaded', function() {
         
         var formData = $(this).serializeArray();
         formData.push(
-            {name: 'project', value: projectName}, // Send the actual project name
-            {name: 'table_name', value: selectedProject}, // Send the table name
+            {name: 'project', value: projectName},
+            {name: 'table_name', value: selectedProject},
             {name: 'action', value: 'update'},
             {name: 'nik', value: '<?php echo $_SESSION['user_nik']; ?>'}
         );
 
-        $.ajax({
-            url: '<?php echo Router::url("controller/c_tbl_metrics.php"); ?>',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                try {
-                    var result = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (result.error) {
-                        showNotification(result.error, 'error');
-                        return;
+        // Show loading state
+        var submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
+        // Close modal before AJAX request
+        $('#editKPIModal').modal('hide');
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css('padding-right', '');
+
+        // Add slight delay before making the AJAX request
+        setTimeout(function() {
+            $.ajax({
+                url: '<?php echo Router::url("controller/c_tbl_metrics.php"); ?>',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    try {
+                        var result = typeof response === 'string' ? JSON.parse(response) : response;
+                        
+                        if (result.error) {
+                            showNotification(result.error, 'error');
+                        } else {
+                            showNotification('KPI edited successfully', 'success');
+                            // Refresh data after notification
+                            setTimeout(function() {
+                                $('#summaryProject').trigger('change');
+                            }, 500);
+                        }
+                    } catch (e) {
+                        showNotification('Error processing response', 'error');
                     }
-                    
-                    $('#editKPIModal').modal('hide');
-                    $('.modal-backdrop').remove();
-                    $('body').removeClass('modal-open').css('padding-right', '');
-                    
-                    // Refresh data and show notification
-                    $('#summaryProject').trigger('change');
-                    showNotification('KPI edited successfully', 'success');
-                } catch (e) {
-                    showNotification('Error processing response', 'error');
-                }
-            },
-            error: function(xhr, status, error) {
-                if (xhr.status === 404) {
-                    showNotification('Error: Resource not found. Please check if the controller exists.', 'error');
-                } else {
+                },
+                error: function(xhr, status, error) {
                     showNotification('Error updating KPI: ' + error, 'error');
+                },
+                complete: function() {
+                    // Reset button state
+                    submitBtn.prop('disabled', false).html('Update KPI');
                 }
-            }
-        });
+            });
+        }, 300);
     });
 
     // Import modal handling
@@ -666,42 +676,55 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         var formData = new FormData(this);
         
-        // Add project name from the select option text
         var selectedProject = $('#summaryProject').val();
+        if (!selectedProject) {
+            showNotification('Please select a project first', 'error');
+            return;
+        }
+        
+        // Add project name from the select option text
         var projectName = $('#summaryProject option:selected').text();
         
         formData.append('project', projectName);
         formData.append('table_name', selectedProject);
         
-        $.ajax({
-            url: '<?php echo Router::url("controller/c_import_kpi_summary.php"); ?>',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                // Close the modal first
-                $('#importSummaryModal').modal('hide');
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open').css('padding-right', '');
-                
-                if (response.success) {
-                    showNotification('KPI data imported successfully', 'success');
-                    // Refresh the table
-                    $('#summaryProject').trigger('change');
-                } else {
-                    showNotification(response.error || 'Import failed', 'error');
+        // Show loading state
+        var submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Importing...');
+
+        // Close modal before AJAX request
+        $('#importSummaryModal').modal('hide');
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css('padding-right', '');
+
+        // Add slight delay before making the AJAX request
+        setTimeout(function() {
+            $.ajax({
+                url: '<?php echo Router::url("kpi/summary/import"); ?>',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        showNotification('KPI data imported successfully', 'success');
+                        // Refresh the table after notification
+                        setTimeout(function() {
+                            $('#summaryProject').trigger('change');
+                        }, 500);
+                    } else {
+                        showNotification(response.error || 'Import failed', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showNotification('Error importing data: ' + error, 'error');
+                },
+                complete: function() {
+                    // Reset button state
+                    submitBtn.prop('disabled', false).html('Import');
                 }
-            },
-            error: function(xhr, status, error) {
-                // Close the modal first
-                $('#importSummaryModal').modal('hide');
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open').css('padding-right', '');
-                
-                showNotification('Error importing data: ' + error, 'error');
-            }
-        });
+            });
+        }, 300);
     });
 
     // File input change handler
@@ -713,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Update showNotification function
 function showNotification(message, type = 'success') {
-    // Remove any existing notifications and modal backdrops
+    // Remove any existing notifications and modal artifacts
     $('.floating-alert').remove();
     $('.modal-backdrop').remove();
     $('body').removeClass('modal-open').css('padding-right', '');

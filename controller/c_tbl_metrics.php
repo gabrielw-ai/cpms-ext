@@ -163,11 +163,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 foreach ($tables as $tableName) {
-                    // First check if the new combination would create a duplicate
+                    // First check if the combination exists in current table
                     if ($_POST['queue'] !== $_POST['original_queue'] || $_POST['kpi_metrics'] !== $_POST['original_kpi_metrics']) {
                         $checkStmt = $conn->prepare("
-                            SELECT id FROM `$tableName` 
-                            WHERE queue = ? AND kpi_metrics = ? 
+                            SELECT COUNT(*) as count 
+                            FROM `$tableName` 
+                            WHERE queue = ? 
+                            AND kpi_metrics = ? 
                             AND id != ?
                         ");
                         $checkStmt->execute([
@@ -175,32 +177,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_POST['kpi_metrics'],
                             $_POST['id']
                         ]);
+                        $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
                         
-                        if ($checkStmt->fetch()) {
+                        if ($result['count'] > 0) {
+                            $conn->rollBack();
                             throw new Exception("This combination of Queue and KPI Metrics already exists");
                         }
                     }
 
-                    // If no duplicate found, proceed with update
-                    $stmt = $conn->prepare("
+                    // First update the non-unique columns
+                    $updateStmt = $conn->prepare("
                         UPDATE `$tableName` 
-                        SET queue = ?, 
-                            kpi_metrics = ?, 
-                            target = ?, 
+                        SET target = ?,
                             target_type = ?
                         WHERE id = ?
                     ");
                     
-                    $stmt->execute([
-                        $_POST['queue'],
-                        $_POST['kpi_metrics'],
+                    $updateStmt->execute([
                         $_POST['target'],
                         $_POST['target_type'],
                         $_POST['id']
                     ]);
+
+                    // Then update the unique columns if they changed
+                    if ($_POST['queue'] !== $_POST['original_queue'] || $_POST['kpi_metrics'] !== $_POST['original_kpi_metrics']) {
+                        $updateUniqueStmt = $conn->prepare("
+                            UPDATE `$tableName` 
+                            SET queue = ?,
+                                kpi_metrics = ?
+                            WHERE id = ?
+                        ");
+                        
+                        $updateUniqueStmt->execute([
+                            $_POST['queue'],
+                            $_POST['kpi_metrics'],
+                            $_POST['id']
+                        ]);
+                    }
                 }
 
-                // Commit transaction
+                // If we get here, all updates were successful
                 $conn->commit();
                 
                 echo json_encode([

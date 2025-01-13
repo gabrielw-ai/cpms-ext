@@ -1,6 +1,6 @@
 <?php
 // Environment setting
-define('ENVIRONMENT', 'development'); // Change to 'production' for live server
+define('ENVIRONMENT', 'production'); // Change to 'production' for live server
 
 // Session configuration MUST be set before ANY session_start, 
 // including those in other files
@@ -43,10 +43,10 @@ if (ENVIRONMENT === 'development') {
 }
 
 // Site configuration
-define('SITE_URL', 'http://localhost'); // Change this to your domain
+define('SITE_URL', 'https://ratcha.net/demos'); // Change this to your domain
 
 // Set the application subdirectory
-$app_subdir = 'cpms';
+$app_subdir = 'demos';
 define('BASE_PATH', '/' . trim($app_subdir, '/'));
 define('APP_NAME', 'CPMS');
 

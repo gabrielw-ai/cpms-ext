@@ -83,4 +83,9 @@ return [
     // KPI Delete route
     'kpi/delete' => 'controller/c_viewer_del.php',
     'employee/details' => 'controller/get_employee_details.php',
+    
+    // KPI Summary routes
+    'kpi/summary/get' => 'controller/get_kpi_summary.php',
+    'kpi/summary/export' => 'controller/c_export_kpi_summary.php',
+    'kpi/summary/import' => 'controller/c_import_kpi_summary.php',
 ];
