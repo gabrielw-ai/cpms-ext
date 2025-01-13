@@ -24,10 +24,10 @@ CPMS stands for Centralized Performance Management Systems Beta V1.
 
 ## Requirements
 
-1. PHP 7.xx or higher
+1. PHP >8.xx
 2. httpd is required instead of NGINX since we are using `.htaccess` to manage routing easily.
 3. MariaDB
-4. Composer to install PHPSpreadsheet
+4. Support php extension to use all functionality of PHPSpreadsheet
 
 ## Project Structure
 
@@ -61,6 +61,7 @@ cpms/
 + ## What to Add Next
 1. Year db fields
 2. Chart generator for some of user 
+3. Documentation
 
 
 
