@@ -45,24 +45,22 @@ cpms/
 ```
 
 + **Project Structure Definition:**
-+ 
-+ 1. **Controller**: Handles all actions including updates and deletes.
-+    - `c_xxxx`: Controllers for views to handle the deletes, updates, etc.
-+    - `get_xxx`: Controllers to fetch data or queries from the database based on user selection.
-+ 2. **Routes & Routing**: Manages the application's routing structure.
-+ 3. **main_navbar.php**: Serves as the overall navigation bar across the application.
+ 
+ 1. **Controller**: Handles all actions including updates and deletes.
+    - `c_xxxx`: Controllers for views to handle the deletes, updates, etc.
+    - `get_xxx`: Controllers to fetch data or queries from the database based on user selection.
+2. **Routes & Routing**: Manages the application's routing structure.
+ 3. **main_navbar.php**: Serves as the overall navigation bar across the application.
  
 + ## How to Install
  
-+ 1. Directly clone the repository using `git clone <repo-url>`.
-+ 2. Open `site_config.php` and configure the sub-directory and database settings.
-+ 3. **Mandatory**: In `.htaccess`, edit the `RewriteBase /sub-folder` accordingly to avoid routing errors.
+1. Directly clone the repository using `git clone <repo-url>`.
+2. Open `site_config.php` and configure the sub-directory and database settings.
+3. **Mandatory**: In `.htaccess`, edit the `RewriteBase /sub-folder` accordingly to avoid routing errors.
  
-+ ## What to Fix Next
-
-+ 1. Implement error handling notifications for various scenarios.
-+ 2. Enable tenure auto-load and calculations.
-+ 3. Develop privileges management functionality.
++ ## What to Add Next
+1. Year db fields
+2. Chart generator for some of user 
 
 
 
