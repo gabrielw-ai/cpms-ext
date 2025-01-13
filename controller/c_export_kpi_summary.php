@@ -88,14 +88,9 @@ try {
     // Add data to spreadsheet
     $row = 2;
     foreach ($data as $record) {
-        $targetValue = $record['target'];
-        if ($record['target_type'] === 'percentage') {
-            $targetValue .= '%';
-        }
-
         $sheet->setCellValue('A' . $row, $record['queue'])
               ->setCellValue('B' . $row, $record['kpi_metrics'])
-              ->setCellValue('C' . $row, $targetValue)
+              ->setCellValue('C' . $row, $record['target'])
               ->setCellValue('D' . $row, $record['target_type']);
         $row++;
     }

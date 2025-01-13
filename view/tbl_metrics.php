@@ -666,6 +666,13 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         var formData = new FormData(this);
         
+        // Add project name from the select option text
+        var selectedProject = $('#summaryProject').val();
+        var projectName = $('#summaryProject option:selected').text();
+        
+        formData.append('project', projectName);
+        formData.append('table_name', selectedProject);
+        
         $.ajax({
             url: '<?php echo Router::url("controller/c_import_kpi_summary.php"); ?>',
             type: 'POST',
@@ -683,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Refresh the table
                     $('#summaryProject').trigger('change');
                 } else {
-                    showNotification(response.data.error || 'Import failed', 'error');
+                    showNotification(response.error || 'Import failed', 'error');
                 }
             },
             error: function(xhr, status, error) {

@@ -163,7 +163,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 foreach ($tables as $tableName) {
-                    // Update KPI in each table
+                    // First check if the new combination would create a duplicate
+                    if ($_POST['queue'] !== $_POST['original_queue'] || $_POST['kpi_metrics'] !== $_POST['original_kpi_metrics']) {
+                        $checkStmt = $conn->prepare("
+                            SELECT id FROM `$tableName` 
+                            WHERE queue = ? AND kpi_metrics = ? 
+                            AND id != ?
+                        ");
+                        $checkStmt->execute([
+                            $_POST['queue'],
+                            $_POST['kpi_metrics'],
+                            $_POST['id']
+                        ]);
+                        
+                        if ($checkStmt->fetch()) {
+                            throw new Exception("This combination of Queue and KPI Metrics already exists");
+                        }
+                    }
+
+                    // If no duplicate found, proceed with update
                     $stmt = $conn->prepare("
                         UPDATE `$tableName` 
                         SET queue = ?, 
