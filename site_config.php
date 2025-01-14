@@ -43,10 +43,10 @@ if (ENVIRONMENT === 'development') {
 }
 
 // Site configuration
-define('SITE_URL', 'https://ratcha.net/demos'); // Change this to your domain
+define('SITE_URL', 'localhost'); // Change this to your domain
 
 // Set the application subdirectory
-$app_subdir = 'demos';
+$app_subdir = 'cpms';
 define('BASE_PATH', '/' . trim($app_subdir, '/'));
 define('APP_NAME', 'CPMS');
 
